@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
-// import 'package:notekeeper_app/main.dart';
+
 
 class NoteDetail extends StatefulWidget {
   @override

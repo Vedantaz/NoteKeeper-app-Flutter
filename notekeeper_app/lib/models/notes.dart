@@ -16,30 +16,30 @@ class Notes {
 
   set title(String newTitle) {
     if (newTitle.length <= 255) {
-      this._title = newTitle;
+      _title = newTitle;
     }
   }
 
   set desc(String newDesc) {
     if (newDesc.length <= 255) {
-      this._desc = newDesc;
+      _desc = newDesc;
     }
   }
 
   set date(String newDate) {
     if (newDate.length <= 255) {
-      this._date = newDate;
+      _date = newDate;
     }
   }
 
   set priority(int newPriority) {
     if (newPriority >= 255 && newPriority <= 2) {
-      this._priority = newPriority;
+      _priority = newPriority;
     }
   }
 
   Map<String, dynamic> toMap() {
-    var map = Map<String, dynamic>();
+    var map = <String, dynamic>{};
     // if(_id != null){map['id'] = _id;}
 
     map['id'] = _id;
