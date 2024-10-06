@@ -1,4 +1,4 @@
-import 'dart:io';
+// import 'dart:io';
 import 'dart:async';
 
 import 'package:notekeeper_app/utils/database_helper.dart';
@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
 
 import 'package:notekeeper_app/screens/note_details.dart';
-import 'package:path_provider/path_provider.dart';
+// import 'package:path_provider/path_provider.dart';
 import 'package:notekeeper_app/models/notes.dart';
 
 class NoteList extends StatefulWidget {
@@ -33,7 +33,7 @@ class NoteListState extends State<NoteList> {
         foregroundColor: Theme.of(context).primaryColorLight,
         onPressed: () {
           debugPrint('FAB is clicked');
-          navigateToDetail('Add Note');
+          navigateToDetail(Notes(), 'Add Note');
         },
         tooltip: 'Add note',
         child: const Icon(Icons.add),
@@ -65,12 +65,12 @@ class NoteListState extends State<NoteList> {
                 color: Colors.blueGrey,
               ),
               onTap: () {
-                _delete(context, noteList[position]);
+                delete(context, noteList[position]);
               },
             ),
             onTap: () {
               debugPrint('print the statement');
-              navigateToDetail('Edit Note');
+              navigateToDetail(noteList[position], 'Edit Note');
             },
           ),
         );
@@ -107,6 +107,7 @@ class NoteListState extends State<NoteList> {
     int res = await databaseHelper.deleteNote(note.id);
     if (res != 0) {
       _showSnackBar(context, 'Note Deleted Successfully');
+      updateListView();
     }
   }
 
@@ -115,18 +116,30 @@ class NoteListState extends State<NoteList> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  void navigateToDetail(String title) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
+  void navigateToDetail(Notes note, String title) async {
+    bool res =
+        await Navigator.push(context, MaterialPageRoute(builder: (context) {
       return NoteDetail(
+        note: note,
         appTitle: title,
       );
     }));
+
+    if (res == true) {
+      updateListView();
+    }
   }
-  void updateView(){
-    final Future<Database> dbFuture = DatabaseHelper.intializeDatabase();
+
+  void updateListView() {
+    final Future<Database> dbFuture = databaseHelper.initializeDatabase();
     dbFuture.then((database) {
       Future<List<Notes>> noteListFuture = databaseHelper.getNoteList();
-
+      noteListFuture.then((noteList) {
+        setState(() {
+          this.noteList = noteList;
+          count = noteList.length;
+        });
+      });
+    });
   }
-}
 }

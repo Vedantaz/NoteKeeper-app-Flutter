@@ -1,9 +1,9 @@
 class Notes {
-  int _id = 0; // Default value
-  String _date = ''; // Default value
-  int _priority = 0; // Default value
   String _title = ''; // Default value
   String _desc = ''; // Default value
+  int _priority = 0; // Default value
+  String _date = ''; // Default value
+  int _id = 0; // Default value
 
   Notes(this._id, this._title, this._desc, this._priority, this._date);
   Notes.withId(this._id, this._title, this._desc, this._priority, this._date);

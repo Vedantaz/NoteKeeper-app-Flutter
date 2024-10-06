@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
-
+import 'package:intl/intl.dart';
+import 'package:notekeeper_app/models/notes.dart';
+import 'package:notekeeper_app/utils/database_helper.dart';
+// import 'package:sqflite/sqflite.dart';
 
 class NoteDetail extends StatefulWidget {
-  @override
+  // @override
   final String appTitle;
-  const NoteDetail({super.key, required this.appTitle});
+  final Notes note;
+
+  const NoteDetail({super.key, required this.appTitle, required this.note});
 
   @override
-  State<StatefulWidget> createState() => NoteDetailState(appTitle);
+  State<StatefulWidget> createState() =>
+      NoteDetailState(this.note, this.appTitle);
+  // NoteDetailState();
 }
 
 class NoteDetailState extends State<NoteDetail> {
@@ -15,16 +22,33 @@ class NoteDetailState extends State<NoteDetail> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descController = TextEditingController();
 
-  NoteDetailState(this.appTitle);
-
+  NoteDetailState(this.note, this.appTitle);
+  Notes note;
   String appTitle;
+
   String _selectedPriority = 'Low';
+  DatabaseHelper helper = DatabaseHelper();
+
   int count = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // note = widget.note; // Initialize the note
+    // appTitle = widget.appTitle; // Initialize the app title
+
+    titleController.text = widget.note.title; // Use widget to access note
+    descController.text = widget.note.desc;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // titleController.text = note.title;
+    // descController.text = note.desc;
+
     return Scaffold(
         appBar: AppBar(
-          title: Text(appTitle),
+          title: Text(widget.appTitle),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context), // Simplified navigation
@@ -51,6 +75,7 @@ class NoteDetailState extends State<NoteDetail> {
                         setState(() {
                           _selectedPriority = newValue!;
                           debugPrint('User Selected $_selectedPriority');
+                          updatePriorityInt(_selectedPriority);
                         });
                       }),
                 ),
@@ -64,6 +89,7 @@ class NoteDetailState extends State<NoteDetail> {
                         fontSize: 12, fontWeight: FontWeight.bold),
                     onChanged: (value) {
                       debugPrint('Something changed in Title txt field');
+                      updateTitle();
                     },
                     decoration: InputDecoration(
                       labelText: 'Title',
@@ -85,6 +111,7 @@ class NoteDetailState extends State<NoteDetail> {
                         fontSize: 12, fontWeight: FontWeight.bold),
                     onChanged: (value) {
                       debugPrint('Something changed in Description txt field');
+                      updateDesc();
                     },
                     decoration: InputDecoration(
                       labelText: 'Description',
@@ -118,6 +145,7 @@ class NoteDetailState extends State<NoteDetail> {
                           onPressed: () {
                             setState(() {
                               debugPrint('Save button clicked');
+                              save();
                             });
                           },
                         ),
@@ -140,6 +168,7 @@ class NoteDetailState extends State<NoteDetail> {
                           onPressed: () {
                             setState(() {
                               debugPrint('Delete button clicked');
+                              delete();
                             });
                           },
                         ),
@@ -185,7 +214,102 @@ class NoteDetailState extends State<NoteDetail> {
   }
 
   bool moveToLastScreen() {
-    Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context, true);
+    }
+    // Navigator.pop(context, true);
     return true;
+  }
+
+  // convert the string priority to the form of integer value before saving it to the database;
+  void updatePriorityInt(String value) {
+    switch (value) {
+      case 'High':
+        note.priority = 1;
+        break;
+      case 'Low':
+        note.priority = 2;
+        break;
+    }
+  }
+
+  // convert the int priority to the form of string value and display it to the user in dropdown;
+  String getPriorityAsString(String value) {
+    String priority = '';
+    switch (value) {
+      case '1':
+        priority = _priorities[0];
+        break;
+      case ' 2':
+        priority = _priorities[1];
+        break;
+    }
+    return priority;
+  }
+
+  // update the title of note objects
+  void updateTitle() {
+    note.title = titleController.text;
+  }
+
+  void updateDesc() {
+    note.desc = descController.text; // desc is a textfield
+  }
+
+  void save() async {
+    moveToLastScreen();
+
+    note.date = DateFormat.yMMMd().format(DateTime.now());
+
+    int res =
+        await helper.updateNote(note); // If you're sure `id` is always present
+
+    // if (note.id != null) {
+    //   // case 1 update operation
+    //   res = await helper.updateNote(note);
+    // } else {
+    //   // case 2 insert operation
+    //   res = await helper.insertNote(note);
+    // }
+
+    if (res != 0) {
+      showAlterDialog('Status', 'Note saved successfully.');
+    } else {
+      showAlterDialog('Status', 'Note saved successfully.');
+    }
+  }
+
+  void showAlterDialog(String title, String msg) {
+    AlertDialog alertDialog = AlertDialog(
+      title: Text(title),
+      content: Text(msg),
+    );
+
+    showDialog(
+      context: context,
+      builder: (_) => alertDialog,
+    );
+  }
+
+  void delete() async {
+    moveToLastScreen();
+
+    // case 1: if user is trying to delete to New note he haas come tot the details page by pressing the FAB of noteList page
+
+    // if (note.id == null) {
+    //   showAlterDialog('Status', 'No note was deleted');
+    //   return;
+    // }
+
+    int res = await helper.deleteNote(note.id);
+    if (res != 0) {
+      showAlterDialog('Status', 'Note deleted successfully.');
+    } else {
+      showAlterDialog('Status', 'Error occured while deleting note');
+    }
+
+    // case 2: user is trying to delete the existing note
+    helper.deleteNote(note.id);
+    Navigator.pop(context);
   }
 }
