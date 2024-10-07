@@ -1,12 +1,15 @@
-import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:notekeeper_app/models/notes.dart';
+import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
-  static DatabaseHelper databaseHelper; // singleton databaseHelper
-  static Database _database; // singleton database
+  static final DatabaseHelper _instance =
+      DatabaseHelper._internal(); // singleton databaseHelper
+  factory DatabaseHelper() => _instance;
+  static Database? _database; // singleton database
+  DatabaseHelper._internal();
 
   String noteTable = 'note_table';
   String colId = 'id';
@@ -17,25 +20,33 @@ class DatabaseHelper {
 
   DatabaseHelper._createInstance();
 
-  factory DatabaseHelper() {
-    databaseHelper ??= DatabaseHelper._createInstance();
-    return databaseHelper;
-  }
+  // factory DatabaseHelper() {
+  //   return _instance;
+  // }
 
   Future<Database> get database async {
-    return database;
+    _database ??= await initializeDatabase();
+    return _database!;
   }
 
-  Future<Database> intializeDatabase() async {
+  Future<Database> initializeDatabase() async {
     Directory directory = await getApplicationDocumentsDirectory();
 
-    String path = '${directory.path}notes db';
+    String join(String path1, String path2) {
+      // Implement the logic to join the paths
+      return path1 + path2; // Or use a more robust path joining method
+    }
+
+    String path = join(directory.path, 'notes.db');
 
     //open/create a database at a given path
 
-    var notesDatabase =
-        await openDatabase(path, version: 1, onCreate: _createDb);
-    return notesDatabase;
+    return await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+      await db.execute(
+          'CREATE TABLE Notes(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, desc TEXT, priority INTEGER, date TEXT)');
+    });
+    // return notesDatabase;
   }
 
   void _createDb(Database db, int newVersion) async {
@@ -62,15 +73,15 @@ class DatabaseHelper {
 
   // Update operation - Insert a note object and save it to the database
   Future<int> updateNote(Notes note) async {
-    Database db = await database;
-    var res = await db.insert(noteTable, note.toMap(),
+    var db = await database;
+    var res = await db.update(noteTable, note.toMap(),
         where: '$colId = ?', whereArgs: [note.id]);
     return res;
   }
 
   // Delete operation - Delete a note object from database
   Future<int> deleteNote(int id) async {
-    Database db = await database;
+    var db = await database;
     var res = await db.rawDelete('DELETE FROM $noteTable WHERE $colId = id');
     return res;
   }
@@ -79,17 +90,18 @@ class DatabaseHelper {
   Future<int> getCount(int id) async {
     Database db = await database;
     List<Map<String, dynamic>> x =
-        await db.rawQuery('SELECT COUNT FROM $noteTable');
-    int res = Sqflite.firstIntValue(x);
-    return res;
+        await db.rawQuery('SELECT COUNT (*) FROM $noteTable');
+    int? res = Sqflite.firstIntValue(x);
+    return res ?? 0; // Return 0 if res is null
   }
 
   // get the map list List<Map> from database / function and convert it to 'note_list List<Notes>
 
   Future<List<Notes>> getNoteList() async {
-    var noteMapList = await getNoteMapList();
+    var noteMapList = await getNoteListMap();
     int count = noteMapList.length;
-    List<Notes> noteList = List<Notes>();
+    List<Notes> noteList = List<Notes>.empty(); // Creates an empty list
+
     // For loop to convert each mapList into its respective object
     for (int i = 0; i < count; i++) {
       noteList.add(Notes.fromMapObject(noteMapList[i]));

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:notekeeper_app/screens/note_list.dart';
 // import 'package:notekeeper_app/screens/note_list.dart';
+import 'package:notekeeper_app/screens/note_details.dart';
 
 void main() {
   runApp(const MyApp());

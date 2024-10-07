@@ -1,12 +1,12 @@
 class Notes {
+  int _id = 0; // Default value
   String _title = ''; // Default value
   String _desc = ''; // Default value
-  int _priority = 0; // Default value
   String _date = ''; // Default value
-  int _id = 0; // Default value
+  int _priority = 0; // Default value
 
-  Notes(this._id, this._title, this._desc, this._priority, this._date);
-  Notes.withId(this._id, this._title, this._desc, this._priority, this._date);
+  Notes(this._title, this._date, this._priority, this._desc);
+  Notes.withId(this._id, this._title, this._date, this._priority, this._desc);
 
   int get id => _id;
   String get title => _title;
@@ -33,7 +33,7 @@ class Notes {
   }
 
   set priority(int newPriority) {
-    if (newPriority >= 255 && newPriority <= 2) {
+    if (newPriority >= 1 && newPriority <= 2) {
       _priority = newPriority;
     }
   }

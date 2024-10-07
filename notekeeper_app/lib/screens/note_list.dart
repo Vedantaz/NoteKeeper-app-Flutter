@@ -1,13 +1,10 @@
 // import 'dart:io';
 import 'dart:async';
-
+import 'package:notekeeper_app/models/notes.dart';
 import 'package:notekeeper_app/utils/database_helper.dart';
+import 'package:notekeeper_app/screens/note_details.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
-
-import 'package:notekeeper_app/screens/note_details.dart';
-// import 'package:path_provider/path_provider.dart';
-import 'package:notekeeper_app/models/notes.dart';
 
 class NoteList extends StatefulWidget {
   const NoteList({super.key});
@@ -23,6 +20,7 @@ class NoteListState extends State<NoteList> {
 
   @override
   Widget build(BuildContext context) {
+    updateListView();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notes'),
@@ -33,7 +31,8 @@ class NoteListState extends State<NoteList> {
         foregroundColor: Theme.of(context).primaryColorLight,
         onPressed: () {
           debugPrint('FAB is clicked');
-          navigateToDetail(Notes(), 'Add Note');
+          // navigateToDetail(Notes('', '', 2, DateTime.now().toString(), 0), 'Add Note');
+          navigateToDetail(Notes('', '', 2, ''), 'Add Note');
         },
         tooltip: 'Add note',
         child: const Icon(Icons.add),
