@@ -11,8 +11,7 @@ class NoteDetail extends StatefulWidget {
   const NoteDetail({super.key, required this.appTitle, required this.note});
 
   @override
-  State<StatefulWidget> createState() =>
-      NoteDetailState(this.note, this.appTitle);
+  State<StatefulWidget> createState() => NoteDetailState(note, appTitle);
   // NoteDetailState();
 }
 
@@ -41,17 +40,6 @@ class NoteDetailState extends State<NoteDetail> {
 
   @override
   Widget build(BuildContext context) {
-    // titleController.text = note.title;
-    // descController.text = note.desc;
-
-    // return Scaffold(
-    // appBar: AppBar(
-    //   title: Text(widget.appTitle),
-    //   leading: IconButton(
-    //     icon: const Icon(Icons.arrow_back),
-    //     onPressed: () => Navigator.pop(context), // Simplified navigation
-    //   ),
-    // ),
     return WillPopScope(
       onWillPop: () async {
         return true;

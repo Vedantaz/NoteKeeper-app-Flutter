@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:notekeeper_app/models/notes.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance =
@@ -31,12 +32,6 @@ class DatabaseHelper {
 
   Future<Database> initializeDatabase() async {
     Directory directory = await getApplicationDocumentsDirectory();
-
-    String join(String path1, String path2) {
-      // Implement the logic to join the paths
-      return path1 + path2; // Or use a more robust path joining method
-    }
-
     String path = join(directory.path, 'notes.db');
 
     //open/create a database at a given path
@@ -46,13 +41,12 @@ class DatabaseHelper {
       await db.execute(
           'CREATE TABLE Notes(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, desc TEXT, priority INTEGER, date TEXT)');
     });
-    // return notesDatabase;
   }
 
-  void _createDb(Database db, int newVersion) async {
-    await db.execute(
-        'CREATE TABLE $noteTable($colId INTEGER PRIMARY KEY AUTOINCREMENT , $colTitle TEXT, $colDesc TEXT, $colPriority INTEGER, $colDate TEXT)');
-  }
+  // void _createDb(Database db, int newVersion) async {
+  //   await db.execute(
+  //       'CREATE TABLE $noteTable($colId INTEGER PRIMARY KEY AUTOINCREMENT , $colTitle TEXT, $colDesc TEXT, $colPriority INTEGER, $colDate TEXT)');
+  // }
 
   // fetch operation oif getting all objects from database
   Future<List<Map<String, dynamic>>> getNoteListMap() async {
@@ -82,7 +76,8 @@ class DatabaseHelper {
   // Delete operation - Delete a note object from database
   Future<int> deleteNote(int id) async {
     var db = await database;
-    var res = await db.rawDelete('DELETE FROM $noteTable WHERE $colId = id');
+    var res =
+        await db.rawDelete('DELETE FROM $noteTable WHERE $colId = ?', [id]);
     return res;
   }
 
@@ -100,7 +95,7 @@ class DatabaseHelper {
   Future<List<Notes>> getNoteList() async {
     var noteMapList = await getNoteListMap();
     int count = noteMapList.length;
-    List<Notes> noteList = List<Notes>.empty(); // Creates an empty list
+    List<Notes> noteList = []; // Creates an empty list
 
     // For loop to convert each mapList into its respective object
     for (int i = 0; i < count; i++) {
