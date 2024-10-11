@@ -8,7 +8,7 @@ class NoteDetail extends StatefulWidget {
   final String appTitle;
   final Notes note;
 
-  const NoteDetail({super.key, required this.appTitle, required this.note});
+  const NoteDetail({super.key, required this.note, required this.appTitle});
 
   @override
   State<StatefulWidget> createState() => NoteDetailState(note, appTitle);
@@ -18,8 +18,8 @@ class NoteDetail extends StatefulWidget {
 class NoteDetailState extends State<NoteDetail> {
   static final _priorities = ['High', 'Low'];
   DatabaseHelper helper = DatabaseHelper();
-  Notes note;
   String appTitle;
+  Notes note;
 
   TextEditingController titleController = TextEditingController();
   TextEditingController descController = TextEditingController();
@@ -69,7 +69,7 @@ class NoteDetailState extends State<NoteDetail> {
                       setState(() {
                         _selectedPriority = newValue!;
                         debugPrint('User Selected $_selectedPriority');
-                        updatePriorityInt(_selectedPriority);
+                        updatePriorityAsInt(_selectedPriority);
                       });
                     }),
               ),
@@ -185,7 +185,7 @@ class NoteDetailState extends State<NoteDetail> {
 
   // convert the string priority to the form of integer value before saving it to the database;
 
-  void updatePriorityInt(String value) {
+  void updatePriorityAsInt(String value) {
     switch (value) {
       case 'High':
         note.priority = 1;

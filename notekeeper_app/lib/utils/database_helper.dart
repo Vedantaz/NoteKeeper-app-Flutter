@@ -26,27 +26,23 @@ class DatabaseHelper {
   // }
 
   Future<Database> get database async {
-    _database ??= await initializeDatabase();
+    _database ??= await initDatabase();
     return _database!;
   }
 
-  Future<Database> initializeDatabase() async {
+  Future<Database> initDatabase() async {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = join(directory.path, 'notes.db');
 
     //open/create a database at a given path
 
-    return await openDatabase(path, version: 1,
-        onCreate: (Database db, int version) async {
-      await db.execute(
-          'CREATE TABLE Notes(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, desc TEXT, priority INTEGER, date TEXT)');
-    });
+    return await openDatabase(path, version: 1, onCreate: _createDb);
   }
 
-  // void _createDb(Database db, int newVersion) async {
-  //   await db.execute(
-  //       'CREATE TABLE $noteTable($colId INTEGER PRIMARY KEY AUTOINCREMENT , $colTitle TEXT, $colDesc TEXT, $colPriority INTEGER, $colDate TEXT)');
-  // }
+  Future<void> _createDb(Database db, int newVersion) async {
+    await db.execute(
+        'CREATE TABLE $noteTable($colId INTEGER PRIMARY KEY AUTOINCREMENT , $colTitle TEXT, $colDesc TEXT, $colPriority INTEGER, $colDate TEXT)');
+  }
 
   // fetch operation oif getting all objects from database
   Future<List<Map<String, dynamic>>> getNoteListMap() async {
@@ -54,7 +50,6 @@ class DatabaseHelper {
     var res =
         await db.rawQuery('SELECT * FROM $noteTable order by $colPriority ASC');
     // var result = await db.query(noteTable, orderBy: '$colPriority ASC' );
-
     return res;
   }
 
