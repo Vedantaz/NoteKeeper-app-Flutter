@@ -10,7 +10,7 @@ class DatabaseHelper {
       DatabaseHelper._internal(); // singleton databaseHelper
   factory DatabaseHelper() => _instance;
   static Database? _database; // singleton database
-  DatabaseHelper._internal();
+
 
   String noteTable = 'note_table';
   String colId = 'id';
@@ -18,6 +18,8 @@ class DatabaseHelper {
   String colDesc = 'description';
   String colPriority = 'priority';
   String colDate = 'date';
+
+  DatabaseHelper._internal();
 
   DatabaseHelper._createInstance();
 
@@ -56,8 +58,7 @@ class DatabaseHelper {
   // insert operation - Insert a note object to the database
   Future<int> insertNote(Notes note) async {
     Database db = await database;
-    var res = await db.insert(noteTable, note.toMap());
-    return res;
+    return await db.insert(noteTable, note.toMap());
   }
 
   // Update operation - Insert a note object and save it to the database
@@ -92,10 +93,10 @@ class DatabaseHelper {
     int count = noteMapList.length;
     List<Notes> noteList = []; // Creates an empty list
 
+    return List.generate(noteMapList.length, (index){
+      return Notes.fromMapObject(noteMapList[index]);
+    });
     // For loop to convert each mapList into its respective object
-    for (int i = 0; i < count; i++) {
-      noteList.add(Notes.fromMapObject(noteMapList[i]));
-    }
-    return noteList;
+
   }
 }
